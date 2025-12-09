@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGGRAPH Asia 2025 日程分类器</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #f8f9fd;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #eef1f8;
+            --text-primary: #1a1d29;
+            --text-secondary: #6b7280;
+            --text-tertiary: #9ca3af;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-tertiary: #ec4899;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 2px 8px rgba(99, 102, 241, 0.08);
+            --shadow-md: 0 8px 24px rgba(99, 102, 241, 0.12);
+            --shadow-lg: 0 16px 48px rgba(99, 102, 241, 0.16);
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dark {
+            --bg-primary: #0f1117;
+            --bg-secondary: #1a1d29;
+            --bg-tertiary: #252936;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-tertiary: #9ca3af;
+            --border-color: #374151;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: var(--transition);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Animated Background */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(139, 92, 246, 0.3) 0%, transparent 50%);
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        /* Header */
+        header {
+            padding: 32px 0;
+            backdrop-filter: blur(20px);
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        h1 {
+            font-size: clamp(24px, 4vw, 36px);
+            font-weight: 800;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .stats {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 12px 20px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+
+        /* Filters */
+        .filters {
+            margin: 32px 0;
+            animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .filter-group {
+            background: var(--bg-secondary);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select {
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .category-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .chip {
+            padding: 8px 16px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+        }
+
+        .chip:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chip.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .clear-btn {
+            padding: 12px 24px;
+            background: var(--accent-tertiary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .clear-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Events Grid */
+        .events-container {
+            margin: 32px 0;
+            animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .event-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            animation: scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .event-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-1);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: var(--transition);
+        }
+
+        .event-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .event-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .event-category-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: var(--gradient-2);
+            color: white;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .event-source-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: var(--gradient-3);
+            color: white;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-left: 8px;
+        }
+
+        .event-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .event-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .event-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .event-meta-icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.7;
+        }
+
+        .event-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .event-card.expanded .event-description {
+            -webkit-line-clamp: unset;
+        }
+
+        .no-events {
+            text-align: center;
+            padding: 64px 24px;
+            color: var(--text-tertiary);
+            font-size: 18px;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 64px;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .modal-close {
+            background: var(--bg-tertiary);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            color: var(--text-primary);
+            font-size: 20px;
+        }
+
+        .modal-close:hover {
+            background: var(--accent-tertiary);
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Dark mode detection */
+        @media (prefers-color-scheme: dark) {
+            :root:not(.light) {
+                --bg-primary: #0f1117;
+                --bg-secondary: #1a1d29;
+                --bg-tertiary: #252936;
+                --text-primary: #f9fafb;
+                --text-secondary: #d1d5db;
+                --text-tertiary: #9ca3af;
+                --border-color: #374151;
+                --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+                --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+                --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>📅 SIGGRAPH Asia 2025 日程</h1>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalEvents">0</div>
+                        <div class="stat-label">总活动</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="filteredEvents">0</div>
+                        <div class="stat-label">已筛选</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="filters">
+            <div class="filter-group">
+                <div class="filter-row">
+                    <div class="filter-item">
+                        <label>🔍 搜索</label>
+                        <input type="text" id="searchInput" placeholder="搜索标题、描述或地点...">
+                    </div>
+                    <div class="filter-item">
+                        <label>📍 地点</label>
+                        <select id="locationFilter">
+                            <option value="">所   地点</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label>📆 星期</label>
+                        <select id="dateFilter">
+                            <option value="">所有日期</option>
+                            <option value="1">星期一</option>
+                            <option value="2">星期二</option>
+                            <option value="3">星期三</option>
+                            <option value="4">星期四</option>
+                            <option value="5">星期五</option>
+                            <option value="6">星期六</option>
+                            <option value="0">星期日</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label>📁 来源</label>
+                        <select id="sourceFilter">
+                            <option value="">所有来源</option>
+                            <option value="EX">Enhanced/Experience (EX)</option>
+                            <option value="EA">Enhanced Access (EA)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-item">
+                    <label>🏷️ 活动类型</label>
+                    <div class="category-chips" id="categoryChips"></div>
+                </div>
+                <div style="margin-top: 16px; text-align: right;">
+                    <button class="clear-btn" onclick="clearFilters()">清除筛选</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="events-container">
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+            </div>
+            <div id="eventsGrid" class="events-grid"></div>
+            <div id="noEvents" class="no-events" style="display: none;">
+                😔 未找到匹配的活动
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle"></h2>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        let allEvents = [];
+        let filteredEvents = [];
+        let selectedCategories = new Set();
+
+        // Parse ICS file
+        function parseICS(icsContent, source) {
+            const events = [];
+            const lines = icsContent.split('\n');
+            let currentEvent = null;
+            let currentField = '';
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+
+                // Handle line continuation
+                if (line.startsWith(' ') || line.startsWith('\t')) {
+                    if (currentField && currentEvent) {
+                        currentEvent[currentField] += line.substring(1);
+                    }
+                    continue;
+                }
+
+                if (line === 'BEGIN:VEVENT') {
+                    currentEvent = { source };
+                } else if (line === 'END:VEVENT' && currentEvent) {
+                    if (currentEvent.summary) {
+                        events.push(currentEvent);
+                    }
+                    currentEvent = null;
+                    currentField = '';
+                } else if (currentEvent) {
+                    const colonIndex = line.indexOf(':');
+                    if (colonIndex > 0) {
+                        const key = line.substring(0, colonIndex);
+                        const value = line.substring(colonIndex + 1);
+
+                        if (key.startsWith('DTSTART')) {
+                            currentEvent.start = parseICSDate(value);
+                            currentField = 'start';
+                        } else if (key.startsWith('DTEND')) {
+                            currentEvent.end = parseICSDate(value);
+                            currentField = 'end';
+                        } else if (key === 'SUMMARY') {
+                            currentEvent.summary = value;
+                            currentField = 'summary';
+                        } else if (key === 'LOCATION') {
+                            currentEvent.location = value.replace(/\\,/g, ',');
+                            currentField = 'location';
+                        } else if (key === 'DESCRIPTION') {
+                            currentEvent.description = value.replace(/\\n/g, '\n').replace(/\\,/g, ',');
+                            currentField = 'description';
+                        } else if (key === 'UID') {
+                            currentEvent.uid = value;
+                            currentField = 'uid';
+                        }
+                    }
+                }
+            }
+
+            return events;
+        }
+
+        function parseICSDate(dateStr) {
+            // Handle format like "20251215T080000"
+            if (dateStr.length >= 15) {
+                const year = dateStr.substring(0, 4);
+                const month = dateStr.substring(4, 6);
+                const day = dateStr.substring(6, 8);
+                const hour = dateStr.substring(9, 11);
+                const minute = dateStr.substring(11, 13);
+                return new Date(`${year}-${month}-${day}T${hour}:${minute}:00`);
+            }
+            return new Date(dateStr);
+        }
+
+        function formatDate(date) {
+            if (!date || !(date instanceof Date) || isNaN(date)) return '';
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const weekday = weekdays[date.getDay()];
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            const time = date.toLocaleTimeString('zh-CN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+            return `${month}/${day} ${weekday} ${time}`;
+        }
+
+        function formatDateOnly(date) {
+            if (!date || !(date instanceof Date) || isNaN(date)) return '';
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            return weekdays[date.getDay()];
+        }
+
+        function categorizeEvent(event) {
+            const summary = event.summary.toLowerCase();
+            const description = (event.description || '').toLowerCase();
+
+            if (summary.includes('registration')) return 'Registration';
+            if (summary.includes('keynote') || summary.includes('invited talk')) return 'Keynote';
+            if (summary.includes('paper') || summary.includes('technical')) return 'Technical Papers';
+            if (summary.includes('poster')) return 'Posters';
+            if (summary.includes('course')) return 'Courses';
+            if (summary.includes('workshop')) return 'Workshops';
+            if (summary.includes('panel')) return 'Panels';
+            if (summary.includes('exhibition') || summary.includes('exhibit')) return 'Exhibition';
+            if (summary.includes('reception') || summary.includes('party')) return 'Social';
+            if (summary.includes('break') || summary.includes('coffee') || summary.includes('lunch')) return 'Break';
+            if (summary.includes('session')) return 'Session';
+
+            return 'Other';
+        }
+
+        async function loadEvents() {
+            try {
+                const [exResponse, eaResponse] = await Promise.all([
+                    fetch('https://pfst.cf2.poecdn.net/base/text/085d2a072604d7b02ecc77f220421af05838992ad4d74a7b88d67aba9d436516'),
+                    fetch('https://pfst.cf2.poecdn.net/base/text/6fda2e1bb14e6604add8c9d55bc9a19da91345f96a4d69194a3f23abdb6aedd5')
+                ]);
+
+                const [exText, eaText] = await Promise.all([
+                    exResponse.text(),
+                    eaResponse.text()
+                ]);
+
+                const exEvents = parseICS(exText, 'EX');
+                const eaEvents = parseICS(eaText, 'EA');
+
+                allEvents = [...exEvents, ...eaEvents].map(event => ({
+                    ...event,
+                    category: categorizeEvent(event)
+                }));
+
+                // Sort by date
+                allEvents.sort((a, b) => (a.start || 0) - (b.start || 0));
+
+                populateFilters();
+                filterEvents();
+
+                document.getElementById('loading').style.display = 'none';
+            } catch (error) {
+                console.error('Error loading events:', error);
+                document.getElementById('loading').innerHTML = '<p style="color: var(--accent-tertiary);">加载事件时出错</p>';
+            }
+        }
+
+        function populateFilters() {
+            // Populate locations
+            const locations = [...new Set(allEvents.map(e => e.location).filter(Boolean))].sort();
+            const locationFilter = document.getElementById('locationFilter');
+            locations.forEach(loc => {
+                const option = document.createElement('option');
+                option.value = loc;
+                option.textContent = loc;
+                locationFilter.appendChild(option);
+            });
+
+            // Populate categories
+            const categories = [...new Set(allEvents.map(e => e.category))].sort();
+            const categoryChips = document.getElementById('categoryChips');
+            categories.forEach(cat => {
+                const chip = document.createElement('div');
+                chip.className = 'chip';
+                chip.textContent = cat;
+                chip.onclick = () => toggleCategory(cat, chip);
+                categoryChips.appendChild(chip);
+            });
+        }
+
+        function toggleCategory(category, chipElement) {
+            if (selectedCategories.has(category)) {
+                selectedCategories.delete(category);
+                chipElement.classList.remove('active');
+            } else {
+                selectedCategories.add(category);
+                chipElement.classList.add('active');
+            }
+            filterEvents();
+        }
+
+        function filterEvents() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const location = document.getElementById('locationFilter').value;
+            const weekday = document.getElementById('dateFilter').value;
+            const source = document.getElementById('sourceFilter').value;
+
+            filteredEvents = allEvents.filter(event => {
+                // Search filter
+                if (searchTerm) {
+                    const searchText = `${event.summary} ${event.description} ${event.location}`.toLowerCase();
+                    if (!searchText.includes(searchTerm)) return false;
+                }
+
+                // Location filter
+                if (location && event.location !== location) return false;
+
+                // Weekday filter
+                if (weekday && event.start) {
+                    const eventWeekday = event.start.getDay();
+                    if (eventWeekday.toString() !== weekday) return false;
+                }
+
+                // Source filter
+                if (source && event.source !== source) return false;
+
+                // Category filter
+                if (selectedCategories.size > 0 && !selectedCategories.has(event.category)) return false;
+
+                return true;
+            });
+
+            renderEvents();
+            updateStats();
+        }
+
+        function renderEvents() {
+            const grid = document.getElementById('eventsGrid');
+            const noEvents = document.getElementById('noEvents');
+
+            if (filteredEvents.length === 0) {
+                grid.style.display = 'none';
+                noEvents.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            noEvents.style.display = 'none';
+
+            grid.innerHTML = filteredEvents.map((event, index) => `
+                <div class="event-card" onclick="openModal(${index})" style="animation-delay: ${Math.min(index * 0.05, 1)}s">
+                    <div>
+                        <span class="event-category-badge">${event.category}</span>
+                        <span class="event-source-badge">${event.source}</span>
+                    </div>
+                    <div class="event-title">${event.summary}</div>
+                    <div class="event-meta">
+                        <div class="event-meta-item">
+                            <span>📅</span>
+                            <span>${formatDate(event.start)}</span>
+                        </div>
+                        ${event.location ? `
+                        <div class="event-meta-item">
+                            <span>📍</span>
+                            <span>${event.location}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    ${event.description ? `
+                    <div class="event-description">${event.description.substring(0, 150)}...</div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function openModal(index) {
+            const event = filteredEvents[index];
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            modalTitle.textContent = event.summary;
+            modalBody.innerHTML = `
+                <div style="margin-bottom: 16px;">
+                    <span class="event-category-badge">${event.category}</span>
+                    <span class="event-source-badge">${event.source}</span>
+                </div>
+                <div class="event-meta" style="margin-bottom: 20px;">
+                    <div class="event-meta-item">
+                        <span>📅</span>
+                        <span><strong>开始:</strong> ${formatDate(event.start)}</span>
+                    </div>
+                    <div class="event-meta-item">
+                        <span>📅</span>
+                        <span><strong>结束:</strong> ${formatDate(event.end)}</span>
+                    </div>
+                    ${event.location ? `
+                    <div class="event-meta-item">
+                        <span>📍</span>
+                        <span><strong>地点:</strong> ${event.location}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                ${event.description ? `
+                <div>
+                    <h3 style="margin-bottom: 12px; font-size: 16px; color: var(--text-secondary);">详细说明</h3>
+                    <div style="white-space: pre-wrap; color: var(--text-secondary); line-height: 1.8;">${event.description}</div>
+                </div>
+                ` : ''}
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('locationFilter').value = '';
+            document.getElementById('dateFilter').value = '';
+            document.getElementById('sourceFilter').value = '';
+            selectedCategories.clear();
+            document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
+            filterEvents();
+        }
+
+        function updateStats() {
+            document.getElementById('totalEvents').textContent = allEvents.length;
+            document.getElementById('filteredEvents').textContent = filteredEvents.length;
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', filterEvents);
+        document.getElementById('locationFilter').addEventListener('change', filterEvents);
+        document.getElementById('dateFilter').addEventListener('change', filterEvents);
+        document.getElementById('sourceFilter').addEventListener('change', filterEvents);
+
+        // Close modal on outside click
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') closeModal();
+        });
+
+        // Dark mode support
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // Initialize
+        loadEvents();
+    </script>
+</body>
+</html>
