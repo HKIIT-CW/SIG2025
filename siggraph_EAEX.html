@@ -154,6 +154,61 @@
             margin-top: 4px;
         }
 
+        .category-summary {
+            margin: 24px 0;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
+        }
+
+        .category-summary h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .category-stat {
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            cursor: default;
+        }
+
+        .category-stat:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .category-stat-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .category-stat-count {
+            font-size: 22px;
+            font-weight: 700;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         /* Filters */
         .filters {
             margin: 32px 0;
@@ -472,6 +527,35 @@
             color: white;
         }
 
+        .add-to-calendar-btn {
+            width: 100%;
+            padding: 16px 24px;
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .add-to-calendar-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .add-to-calendar-btn:active {
+            transform: translateY(0);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .events-grid {
@@ -527,18 +611,17 @@
     </header>
 
     <div class="container">
+        <div class="category-summary">
+            <h3>🏷️ 活动分类统计</h3>
+            <div class="category-grid" id="categoryStats"></div>
+        </div>
+
         <div class="filters">
             <div class="filter-group">
                 <div class="filter-row">
                     <div class="filter-item">
                         <label>🔍 搜索</label>
                         <input type="text" id="searchInput" placeholder="搜索标题、描述或地点...">
-                    </div>
-                    <div class="filter-item">
-                        <label>📍 地点</label>
-                        <select id="locationFilter">
-                            <option value="">所   地点</option>
-                        </select>
                     </div>
                     <div class="filter-item">
                         <label>📆 星期</label>
@@ -561,10 +644,6 @@
                             <option value="EA">Enhanced Access (EA)</option>
                         </select>
                     </div>
-                </div>
-                <div class="filter-item">
-                    <label>🏷️ 活动类型</label>
-                    <div class="category-chips" id="categoryChips"></div>
                 </div>
                 <div style="margin-top: 16px; text-align: right;">
                     <button class="clear-btn" onclick="clearFilters()">清除筛选</button>
@@ -723,6 +802,7 @@
                 const exEvents = parseICS(exText, 'EX');
                 const eaEvents = parseICS(eaText, 'EA');
 
+                // Store all events without merging
                 allEvents = [...exEvents, ...eaEvents].map(event => ({
                     ...event,
                     category: categorizeEvent(event)
@@ -742,54 +822,21 @@
         }
 
         function populateFilters() {
-            // Populate locations
-            const locations = [...new Set(allEvents.map(e => e.location).filter(Boolean))].sort();
-            const locationFilter = document.getElementById('locationFilter');
-            locations.forEach(loc => {
-                const option = document.createElement('option');
-                option.value = loc;
-                option.textContent = loc;
-                locationFilter.appendChild(option);
-            });
-
-            // Populate categories
-            const categories = [...new Set(allEvents.map(e => e.category))].sort();
-            const categoryChips = document.getElementById('categoryChips');
-            categories.forEach(cat => {
-                const chip = document.createElement('div');
-                chip.className = 'chip';
-                chip.textContent = cat;
-                chip.onclick = () => toggleCategory(cat, chip);
-                categoryChips.appendChild(chip);
-            });
-        }
-
-        function toggleCategory(category, chipElement) {
-            if (selectedCategories.has(category)) {
-                selectedCategories.delete(category);
-                chipElement.classList.remove('active');
-            } else {
-                selectedCategories.add(category);
-                chipElement.classList.add('active');
-            }
-            filterEvents();
+            // No filters to populate now
         }
 
         function filterEvents() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const location = document.getElementById('locationFilter').value;
             const weekday = document.getElementById('dateFilter').value;
             const source = document.getElementById('sourceFilter').value;
 
-            filteredEvents = allEvents.filter(event => {
+            // First apply basic filters
+            let tempFilteredEvents = allEvents.filter(event => {
                 // Search filter
                 if (searchTerm) {
                     const searchText = `${event.summary} ${event.description} ${event.location}`.toLowerCase();
                     if (!searchText.includes(searchTerm)) return false;
                 }
-
-                // Location filter
-                if (location && event.location !== location) return false;
 
                 // Weekday filter
                 if (weekday && event.start) {
@@ -800,14 +847,35 @@
                 // Source filter
                 if (source && event.source !== source) return false;
 
-                // Category filter
-                if (selectedCategories.size > 0 && !selectedCategories.has(event.category)) return false;
-
                 return true;
             });
 
+            // Merge duplicates only when source filter is "all" (empty)
+            if (!source) {
+                const eventMap = new Map();
+                tempFilteredEvents.forEach(event => {
+                    const key = event.uid || `${event.summary}_${event.start?.getTime()}`;
+                    if (eventMap.has(key)) {
+                        // Merge sources
+                        const existing = eventMap.get(key);
+                        if (!existing.sources) {
+                            existing.sources = [existing.source];
+                        }
+                        if (!existing.sources.includes(event.source)) {
+                            existing.sources.push(event.source);
+                        }
+                    } else {
+                        eventMap.set(key, { ...event, sources: [event.source] });
+                    }
+                });
+                filteredEvents = Array.from(eventMap.values());
+            } else {
+                filteredEvents = tempFilteredEvents;
+            }
+
             renderEvents();
             updateStats();
+            updateCategoryStats();
         }
 
         function renderEvents() {
@@ -827,7 +895,7 @@
                 <div class="event-card" onclick="openModal(${index})" style="animation-delay: ${Math.min(index * 0.05, 1)}s">
                     <div>
                         <span class="event-category-badge">${event.category}</span>
-                        <span class="event-source-badge">${event.source}</span>
+                        ${event.sources ? event.sources.map(src => `<span class="event-source-badge">${src}</span>`).join('') : `<span class="event-source-badge">${event.source}</span>`}
                     </div>
                     <div class="event-title">${event.summary}</div>
                     <div class="event-meta">
@@ -859,7 +927,7 @@
             modalBody.innerHTML = `
                 <div style="margin-bottom: 16px;">
                     <span class="event-category-badge">${event.category}</span>
-                    <span class="event-source-badge">${event.source}</span>
+                    ${event.sources ? event.sources.map(src => `<span class="event-source-badge">${src}</span>`).join('') : `<span class="event-source-badge">${event.source}</span>`}
                 </div>
                 <div class="event-meta" style="margin-bottom: 20px;">
                     <div class="event-meta-item">
@@ -883,6 +951,9 @@
                     <div style="white-space: pre-wrap; color: var(--text-secondary); line-height: 1.8;">${event.description}</div>
                 </div>
                 ` : ''}
+                <button class="add-to-calendar-btn" onclick="addToCalendar(${index})">
+                    📅 添加到日历
+                </button>
             `;
 
             modal.classList.add('active');
@@ -892,13 +963,64 @@
             document.getElementById('modal').classList.remove('active');
         }
 
+        function formatICSDate(date) {
+            if (!date || !(date instanceof Date) || isNaN(date)) return '';
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}${month}${day}T${hours}${minutes}${seconds}`;
+        }
+
+        function escapeICS(text) {
+            if (!text) return '';
+            return text.replace(/\\/g, '\\\\')
+                       .replace(/;/g, '\\;')
+                       .replace(/,/g, '\\,')
+                       .replace(/\n/g, '\\n');
+        }
+
+        function addToCalendar(index) {
+            const event = filteredEvents[index];
+
+            // Generate ICS content
+            const icsContent = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//SIGGRAPH Asia 2025//Calendar//EN',
+                'CALSCALE:GREGORIAN',
+                'METHOD:PUBLISH',
+                'BEGIN:VEVENT',
+                `UID:${event.uid || 'event-' + Date.now() + '@siggraphasia.com'}`,
+                `DTSTAMP:${formatICSDate(new Date())}`,
+                `DTSTART:${formatICSDate(event.start)}`,
+                `DTEND:${formatICSDate(event.end)}`,
+                `SUMMARY:${escapeICS(event.summary)}`,
+                event.location ? `LOCATION:${escapeICS(event.location)}` : '',
+                event.description ? `DESCRIPTION:${escapeICS(event.description)}` : '',
+                'STATUS:CONFIRMED',
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ].filter(line => line !== '').join('\r\n');
+
+            // Create blob and download
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${event.summary.replace(/[^a-z0-9]/gi, '_')}.ics`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
         function clearFilters() {
             document.getElementById('searchInput').value = '';
-            document.getElementById('locationFilter').value = '';
             document.getElementById('dateFilter').value = '';
             document.getElementById('sourceFilter').value = '';
-            selectedCategories.clear();
-            document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
             filterEvents();
         }
 
@@ -907,9 +1029,26 @@
             document.getElementById('filteredEvents').textContent = filteredEvents.length;
         }
 
+        function updateCategoryStats() {
+            const categoryCount = {};
+            filteredEvents.forEach(event => {
+                const cat = event.category;
+                categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+            });
+
+            const sorted = Object.entries(categoryCount).sort((a, b) => b[1] - a[1]);
+
+            const categoryStatsDiv = document.getElementById('categoryStats');
+            categoryStatsDiv.innerHTML = sorted.map(([category, count]) => `
+                <div class="category-stat">
+                    <div class="category-stat-name">${category}</div>
+                    <div class="category-stat-count">${count}</div>
+                </div>
+            `).join('');
+        }
+
         // Event listeners
         document.getElementById('searchInput').addEventListener('input', filterEvents);
-        document.getElementById('locationFilter').addEventListener('change', filterEvents);
         document.getElementById('dateFilter').addEventListener('change', filterEvents);
         document.getElementById('sourceFilter').addEventListener('change', filterEvents);
 
