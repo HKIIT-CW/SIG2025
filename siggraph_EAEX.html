@@ -396,6 +396,10 @@
             margin-left: 8px;
         }
 
+        .event-source-badge.king {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+
         .event-title {
             font-size: 18px;
             font-weight: 700;
@@ -637,6 +641,7 @@
                             <option value="">所有来源</option>
                             <option value="EX">Enhanced/Experience (EX)</option>
                             <option value="EA">Enhanced Access (EA)</option>
+                            <option value="King">👑 King's Recommend</option>
                         </select>
                     </div>
                 </div>
@@ -784,21 +789,24 @@
 
         async function loadEvents() {
             try {
-                const [exResponse, eaResponse] = await Promise.all([
+                const [exResponse, eaResponse, kingResponse] = await Promise.all([
                     fetch('https://pfst.cf2.poecdn.net/base/text/085d2a072604d7b02ecc77f220421af05838992ad4d74a7b88d67aba9d436516'),
-                    fetch('https://pfst.cf2.poecdn.net/base/text/6fda2e1bb14e6604add8c9d55bc9a19da91345f96a4d69194a3f23abdb6aedd5')
+                    fetch('https://pfst.cf2.poecdn.net/base/text/6fda2e1bb14e6604add8c9d55bc9a19da91345f96a4d69194a3f23abdb6aedd5'),
+                    fetch('https://pfst.cf2.poecdn.net/base/text/6baca556004017f60544e97181d38eee690005379d924eb56b79b33986809d8b')
                 ]);
 
-                const [exText, eaText] = await Promise.all([
+                const [exText, eaText, kingText] = await Promise.all([
                     exResponse.text(),
-                    eaResponse.text()
+                    eaResponse.text(),
+                    kingResponse.text()
                 ]);
 
                 const exEvents = parseICS(exText, 'EX');
                 const eaEvents = parseICS(eaText, 'EA');
+                const kingEvents = parseICS(kingText, 'King');
 
                 // Store all events without merging
-                allEvents = [...exEvents, ...eaEvents].map(event => ({
+                allEvents = [...exEvents, ...eaEvents, ...kingEvents].map(event => ({
                     ...event,
                     category: categorizeEvent(event)
                 }));
@@ -845,10 +853,34 @@
                 return true;
             });
 
-            // Merge duplicates only when source filter is "all" (empty)
-            if (!source) {
+            // Merge duplicates when source filter is "all" (empty) or "King"
+            if (!source || source === 'King') {
                 const eventMap = new Map();
-                tempFilteredEvents.forEach(event => {
+
+                // If King is selected, first filter all events, then merge
+                let eventsToMerge = allEvents;
+                if (source === 'King') {
+                    // Apply search and date filters to all events
+                    eventsToMerge = allEvents.filter(event => {
+                        // Search filter
+                        if (searchTerm) {
+                            const searchText = `${event.summary} ${event.description} ${event.location}`.toLowerCase();
+                            if (!searchText.includes(searchTerm)) return false;
+                        }
+
+                        // Weekday filter
+                        if (weekday && event.start) {
+                            const eventWeekday = event.start.getDay();
+                            if (eventWeekday.toString() !== weekday) return false;
+                        }
+
+                        return true;
+                    });
+                } else {
+                    eventsToMerge = tempFilteredEvents;
+                }
+
+                eventsToMerge.forEach(event => {
                     const key = event.uid || `${event.summary}_${event.start?.getTime()}`;
                     if (eventMap.has(key)) {
                         // Merge sources
@@ -863,7 +895,17 @@
                         eventMap.set(key, { ...event, sources: [event.source] });
                     }
                 });
-                filteredEvents = Array.from(eventMap.values());
+
+                let mergedEvents = Array.from(eventMap.values());
+
+                // If King filter is selected, only keep events that have King source
+                if (source === 'King') {
+                    mergedEvents = mergedEvents.filter(event =>
+                        event.sources && event.sources.includes('King')
+                    );
+                }
+
+                filteredEvents = mergedEvents;
             } else {
                 filteredEvents = tempFilteredEvents;
             }
@@ -889,7 +931,7 @@
                 <div class="event-card" onclick="openModal(${index})" style="animation-delay: ${Math.min(index * 0.05, 1)}s">
                     <div>
                         <span class="event-category-badge">${event.category}</span>
-                        ${event.sources ? event.sources.map(src => `<span class="event-source-badge">${src}</span>`).join('') : `<span class="event-source-badge">${event.source}</span>`}
+                        ${event.sources ? event.sources.map(src => `<span class="event-source-badge ${src === 'King' ? 'king' : ''}">${src === 'King' ? '👑 King' : src}</span>`).join('') : `<span class="event-source-badge ${event.source === 'King' ? 'king' : ''}">${event.source === 'King' ? '👑 King' : event.source}</span>`}
                     </div>
                     <div class="event-title">${event.summary}</div>
                     <div class="event-meta">
@@ -921,7 +963,7 @@
             modalBody.innerHTML = `
                 <div style="margin-bottom: 16px;">
                     <span class="event-category-badge">${event.category}</span>
-                    ${event.sources ? event.sources.map(src => `<span class="event-source-badge">${src}</span>`).join('') : `<span class="event-source-badge">${event.source}</span>`}
+                    ${event.sources ? event.sources.map(src => `<span class="event-source-badge ${src === 'King' ? 'king' : ''}">${src === 'King' ? '👑 King' : src}</span>`).join('') : `<span class="event-source-badge ${event.source === 'King' ? 'king' : ''}">${event.source === 'King' ? '👑 King' : event.source}</span>`}
                 </div>
                 <div class="event-meta" style="margin-bottom: 20px;">
                     <div class="event-meta-item">
