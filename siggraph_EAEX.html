@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIGGRAPH Asia 2025 日程分类器</title>
+    <title>SIGGRAPH Asia 2025 日程分類器</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -574,6 +574,52 @@
                 width: 100%;
                 justify-content: center;
             }
+
+            /* Mobile: smaller header */
+            header {
+                padding: 20px 0;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .stat-item {
+                padding: 8px 16px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+
+            .stat-label {
+                font-size: 10px;
+            }
+
+            /* Mobile: smaller filters */
+            .filter-group {
+                padding: 16px;
+            }
+
+            label {
+                font-size: 11px;
+            }
+
+            input[type="text"],
+            input[type="date"],
+            select {
+                padding: 10px 14px;
+                font-size: 14px;
+            }
+
+            .clear-btn {
+                padding: 10px 20px;
+                font-size: 13px;
+            }
+
+            .container {
+                padding: 0 16px;
+            }
         }
 
         /* Dark mode detection */
@@ -603,11 +649,11 @@
                 <div class="stats">
                     <div class="stat-item">
                         <div class="stat-value" id="totalEvents">0</div>
-                        <div class="stat-label">总活动</div>
+                        <div class="stat-label">總活動</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-value" id="filteredEvents">0</div>
-                        <div class="stat-label">已筛选</div>
+                        <div class="stat-label">已篩選</div>
                     </div>
                 </div>
             </div>
@@ -620,7 +666,7 @@
                 <div class="filter-row">
                     <div class="filter-item">
                         <label>🔍 搜索</label>
-                        <input type="text" id="searchInput" placeholder="搜索标题、描述或地点...">
+                        <input type="text" id="searchInput" placeholder="搜索標題、描述或地點...">
                     </div>
                     <div class="filter-item">
                         <label>📆 星期</label>
@@ -636,9 +682,9 @@
                         </select>
                     </div>
                     <div class="filter-item">
-                        <label>📁 来源</label>
+                        <label>📁 來源</label>
                         <select id="sourceFilter">
-                            <option value="">所有来源</option>
+                            <option value="">所有來源</option>
                             <option value="EX">Enhanced/Experience (EX)</option>
                             <option value="EA">Enhanced Access (EA)</option>
                             <option value="King">👑 King's Recommend</option>
@@ -646,7 +692,7 @@
                     </div>
                 </div>
                 <div style="margin-top: 16px; text-align: right;">
-                    <button class="clear-btn" onclick="clearFilters()">清除筛选</button>
+                    <button class="clear-btn" onclick="clearFilters()">清除篩選</button>
                 </div>
             </div>
         </div>
@@ -657,7 +703,7 @@
             </div>
             <div id="eventsGrid" class="events-grid"></div>
             <div id="noEvents" class="no-events" style="display: none;">
-                😔 未找到匹配的活动
+                😔 未找到匹配的活動
             </div>
         </div>
     </div>
@@ -792,7 +838,7 @@
                 const [exResponse, eaResponse, kingResponse] = await Promise.all([
                     fetch('https://pfst.cf2.poecdn.net/base/text/085d2a072604d7b02ecc77f220421af05838992ad4d74a7b88d67aba9d436516'),
                     fetch('https://pfst.cf2.poecdn.net/base/text/6fda2e1bb14e6604add8c9d55bc9a19da91345f96a4d69194a3f23abdb6aedd5'),
-                    fetch('https://pfst.cf2.poecdn.net/base/text/6baca556004017f60544e97181d38eee690005379d924eb56b79b33986809d8b')
+                    fetch('https://pfst.cf2.poecdn.net/base/text/1a37c9e294caf01253c2c4d73743e4edc4415fb7b866e6aa07831a0eae5c21b5')
                 ]);
 
                 const [exText, eaText, kingText] = await Promise.all([
@@ -820,7 +866,7 @@
                 document.getElementById('loading').style.display = 'none';
             } catch (error) {
                 console.error('Error loading events:', error);
-                document.getElementById('loading').innerHTML = '<p style="color: var(--accent-tertiary);">加载事件时出错</p>';
+                document.getElementById('loading').innerHTML = '<p style="color: var(--accent-tertiary);">加載事件時出錯</p>';
             }
         }
 
@@ -968,27 +1014,27 @@
                 <div class="event-meta" style="margin-bottom: 20px;">
                     <div class="event-meta-item">
                         <span>📅</span>
-                        <span><strong>开始:</strong> ${formatDate(event.start)}</span>
+                        <span><strong>開始:</strong> ${formatDate(event.start)}</span>
                     </div>
                     <div class="event-meta-item">
                         <span>📅</span>
-                        <span><strong>结束:</strong> ${formatDate(event.end)}</span>
+                        <span><strong>結束:</strong> ${formatDate(event.end)}</span>
                     </div>
                     ${event.location ? `
                     <div class="event-meta-item">
                         <span>📍</span>
-                        <span><strong>地点:</strong> ${event.location}</span>
+                        <span><strong>地點:</strong> ${event.location}</span>
                     </div>
                     ` : ''}
                 </div>
                 ${event.description ? `
                 <div>
-                    <h3 style="margin-bottom: 12px; font-size: 16px; color: var(--text-secondary);">详细说明</h3>
+                    <h3 style="margin-bottom: 12px; font-size: 16px; color: var(--text-secondary);">詳细說明</h3>
                     <div style="white-space: pre-wrap; color: var(--text-secondary); line-height: 1.8;">${event.description}</div>
                 </div>
                 ` : ''}
                 <button class="add-to-calendar-btn" onclick="addToCalendar(${index})">
-                    📅 添加到日历
+                    📅 添加到日歷
                 </button>
             `;
 
